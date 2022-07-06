@@ -1,32 +1,36 @@
-import { db, collection, addDoc, getDocs, } from './init.js'
 
-export const posting = async(nameRecipe, ingredients, stepOne, stepTwo, stepThree, typeRecipe, uploadImg) => {
-    try {
-        const docRef = await addDoc(collection(db, "pots"), {
-            nombre: nameRecipe,
-            ingredientes: [ingredients, ],
-            preparacion: [{ stepOne }, { stepTwo }, { stepThree }],
-            tipo: typeRecipe,
-            img: uploadImg,
-
-        });
-
-        console.log("Document written with ID: ", docRef.id);
-    } catch (e) {
-        console.error("Error adding document: ", e);
-    }
+import { db, collection, addDoc, getDocs, onSnapshot, query } from './init.js'
+export const posting = async (nameRecipe, ingredients, stepOne, stepTwo, stepThree, uploadImg) => {
+    console.log(nameRecipe, ingredients, stepOne, stepTwo, stepThree, uploadImg)
+    await addDoc(collection(db, 'post'), {
+    nameRecipe: nameRecipe,
+        ingredients: [ingredients],
+        preparacion: [{stepOne}, {stepTwo},{stepThree}],
+        uploadImg: uploadImg
+     })
+    
 }
-
 export const capturePost = async() => {
+    try {
+        let dataBasePost = [];
+        const resultDataPost = await getDocs(collection(db, 'post'));
+        resultDataPost.forEach((doc) => {
+            console.log(doc.id, ' => ', doc.data());
+            dataBasePost.push({ id: doc.id, data: doc.data() });
+        });
+        console.log(dataBasePost);
+        
 
-    const querySnapshot = await getDocs(collection(db, "posts"));
-    const postArray = [];
-    querySnapshot.forEach((doc) => {
-        postArray.push({
-            id: doc.id,
-            ...doc.data()
-        })
+        return dataBasePost;
 
-    });
-    return postArray;
-}
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const snapshot = (callback) => {
+    const queryPost = query(collection(db, 'post'));
+    onSnapshot(queryPost, callback);
+};
+
+//window.location.href = '#/wall'
